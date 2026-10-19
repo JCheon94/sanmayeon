@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>산업용대마연구회 · Industrial Hemp Research Association</title>
+  <meta name="description" content="산업용대마연구회는 농업에서 소재, 환경, 지역산업까지 산업용 헴프의 지속가능한 활용 가능성을 연구합니다.">
+  <meta name="theme-color" content="#13562d">
+  <link rel="canonical" href="https://hemprnd.org/">
+  <link rel="icon" href="assets/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:site_name" content="산업용대마연구회">
+  <meta property="og:title" content="산업용대마연구회 · Industrial Hemp Research Association">
+  <meta property="og:description" content="농업에서 소재, 환경, 지역산업까지 산업용 헴프의 지속가능한 활용 가능성을 연구합니다.">
+  <meta property="og:url" content="https://hemprnd.org/">
+  <meta property="og:image" content="https://hemprnd.org/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <style>
+    html, body { margin: 0; height: 100%; background: #faf7ef; }
+    body { font-family: "Pretendard Variable", Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; }
+    .app { position: fixed; inset: 0; width: 100%; height: 100%; height: 100dvh; border: 0; background: #faf7ef; }
+    .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+    .loading { position: fixed; inset: 0; z-index: 2; display: grid; place-content: center; justify-items: center; gap: 14px; background: #faf7ef; color: #13562d; text-align: center; transition: opacity 0.35s; }
+    .loading.done { opacity: 0; pointer-events: none; }
+    .loading img { width: 84px; height: auto; }
+    .loading strong { font-size: 1.375rem; letter-spacing: -0.02em; }
+    .loading p { margin: 0; color: #5c645e; font-size: 1.0625rem; }
+    .loading a { display: none; margin-top: 6px; padding: 12px 20px; background: #13562d; color: #fff; border-radius: 10px; font-weight: 700; text-decoration: none; }
+    .loading.slow a { display: inline-block; }
+    .spinner { width: 34px; height: 34px; border: 4px solid #e6efe3; border-top-color: #13562d; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 3s; } .loading { transition: none; } }
+  </style>
+</head>
+<body>
+  <header class="sr-only">
+    <h1>산업용대마연구회 (Industrial Hemp Research Association)</h1>
+    <p>농업에서 소재, 환경, 지역산업까지 산업용 헴프의 지속가능한 활용 가능성을 연구합니다. 재배, 소재, 지역, 환경 분야의 연구 프로젝트와 활동, 연구성과, 자료를 소개합니다.</p>
+  </header>
+
+  <div class="loading" id="loading" role="status">
+    <img src="assets/logo.png" alt="" width="84" height="93">
+    <strong>산업용대마연구회</strong>
+    <div class="spinner" aria-hidden="true"></div>
+    <p>불러오는 중입니다…</p>
+    <a id="fallback" href="#" target="_blank" rel="noopener">화면이 보이지 않으면 새 창에서 열기</a>
+  </div>
+
+  <iframe class="app" id="app" title="산업용대마연구회 웹사이트" allow="clipboard-write; fullscreen"></iframe>
+
+  <noscript>
+    <p style="padding:24px;font-size:18px">이 사이트를 보려면 JavaScript를 켜 주세요.</p>
+  </noscript>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // 앱(Google Apps Script 웹앱) 주소. 같은 배포 ID를 유지해 업데이트하므로 보통 바꿀 일이 없습니다.
+      var APP_URL = 'https://script.google.com/macros/s/AKfycbzYczxnp6jO8DEHCr_5pM-3Ilwc6L2MdVVyJ2ZmTLm1TIex_6rIFZUn-Z71NdDEGrWPAA/exec';
+      // 앱이 보내는 주소 알림을 받아도 되는 출처(구글 서버)
+      var ALLOWED_ORIGIN = /^https:\/\/([a-z0-9-]+\.)*(googleusercontent\.com|google\.com)$/;
+
+      var frame = document.getElementById('app');
+      var loading = document.getElementById('loading');
+      var fallback = document.getElementById('fallback');
+      var ready = false;
+
+      function currentHash() {
+        return location.hash && location.hash.length > 1 ? location.hash : '';
+      }
+
+      function load(hash, fresh) {
+        var url = APP_URL + (fresh ? '?r=' + Date.now() : '') + (hash ? '#' + hash.replace(/^#/, '') : '');
+        frame.src = url;
+        fallback.href = APP_URL + (hash ? '#' + hash.replace(/^#/, '') : '');
+      }
+
+      function markReady() {
+        if (ready) return;
+        ready = true;
+        loading.classList.add('done');
+        setTimeout(function () { if (loading.parentNode) loading.parentNode.removeChild(loading); }, 500);
+      }
+
+      // 앱이 현재 화면 주소를 알려 주면 주소창과 탭 제목을 맞춘다 (예: hemprnd.org/#/projects)
+      window.addEventListener('message', function (event) {
+        if (!ALLOWED_ORIGIN.test(event.origin)) return;
+        var data = event.data;
+        if (!data || data.type !== 'ihra:route') return;
+
+        if (typeof data.hash === 'string' && data.hash.length < 300 && /^#\/[^\s<>"']*$/.test(data.hash)) {
+          var next = data.hash === '#/' ? '' : data.hash;
+          if (next !== currentHash()) history.replaceState(null, '', location.pathname + location.search + next);
+        }
+        if (typeof data.title === 'string' && data.title) document.title = data.title.slice(0, 120);
+        if (data.ready) markReady();
+      });
+
+      // 사용자가 주소창의 # 부분을 직접 바꾸면 그 화면으로 앱을 다시 연다
+      window.addEventListener('hashchange', function () { load(currentHash(), true); });
+
+      setTimeout(function () { if (!ready) loading.classList.add('slow'); }, 12000);
+      setTimeout(markReady, 25000);
+
+      load(currentHash(), false);
+    })();
+  </script>
+</body>
+</html>
