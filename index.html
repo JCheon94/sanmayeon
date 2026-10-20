@@ -7,8 +7,11 @@
   <meta name="description" content="산업용대마연구회(산마연)는 산업용 헴프를 농업에서 산업으로 연결하기 위해 재배·소재·지역·환경 분야를 연구합니다. 새만금 실증조사, 정책 간담회, 지역 협력 프로젝트 소식을 전합니다.">
   <meta name="theme-color" content="#13562d">
   <link rel="canonical" href="https://hemprnd.org/">
-  <link rel="icon" href="assets/favicon.png" type="image/png">
-  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="/assets/favicon-48.png" type="image/png" sizes="48x48">
+  <link rel="icon" href="/assets/favicon-96.png" type="image/png" sizes="96x96">
+  <link rel="icon" href="/assets/favicon-192.png" type="image/png" sizes="192x192">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 
   <meta property="og:type" content="website">
   <meta property="og:locale" content="ko_KR">
@@ -101,8 +104,21 @@
         return l === 'en' || l === 'ko' ? l : '';
       }
 
-      function load(hash, fresh) {
+      /** 방문 경로(통계용): 들어온 사이트의 이름(도메인)과 홍보 링크 표시(?src= 또는 ?utm_source=)만 앱에 넘긴다 */
+      var visitParams = (function () {
         var q = [];
+        try {
+          var ref = document.referrer ? new URL(document.referrer) : null;
+          if (ref && ref.hostname && ref.hostname !== location.hostname) q.push('ref=' + encodeURIComponent(ref.hostname));
+        } catch (e) { /* 알 수 없는 주소는 무시 */ }
+        var p = new URLSearchParams(location.search);
+        var src = p.get('src') || p.get('utm_source');
+        if (src) q.push('src=' + encodeURIComponent(src.slice(0, 40)));
+        return q;
+      })();
+
+      function load(hash, fresh) {
+        var q = visitParams.slice();
         if (currentLang()) q.push('lang=' + currentLang());
         var base = APP_URL + (q.length ? '?' + q.join('&') : '');
         var url = APP_URL + (q.length || fresh ? '?' + q.concat(fresh ? ['r=' + Date.now()] : []).join('&') : '') + (hash ? '#' + hash.replace(/^#/, '') : '');
