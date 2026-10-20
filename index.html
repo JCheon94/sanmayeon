@@ -2,6 +2,14 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
+  <!-- Google 애널리틱스(GA4). 화면 이동은 앱이 알려 줄 때 아래 스크립트가 직접 기록한다(send_page_view: false). -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-56610TEWYX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-56610TEWYX', { send_page_view: false, allow_google_signals: false, allow_ad_personalization_signals: false });
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>산업용대마연구회(산마연) · Industrial Hemp Research Association</title>
   <meta name="description" content="산업용대마연구회(산마연)는 산업용 헴프를 농업에서 산업으로 연결하기 위해 재배·소재·지역·환경 분야를 연구합니다. 새만금 실증조사, 정책 간담회, 지역 협력 프로젝트 소식을 전합니다.">
@@ -133,11 +141,47 @@
         setTimeout(function () { if (loading.parentNode) loading.parentNode.removeChild(loading); }, 500);
       }
 
+      /* ── Google 애널리틱스 ──
+       * 앱이 hemprnd.org 안의 다른 도메인(구글)에서 열리므로, 화면 이동과 행동은 앱이 알려 주고 여기서 기록한다.
+       * 화면 주소 #/projects → /projects 로 바꿔 보고서에서 화면별로 보이게 한다.
+       * 처음 들어온 주소의 utm_ 값(홍보 링크 표시)은 계속 붙여 유입 경로가 남게 한다. */
+      var firstSearch = (function () {
+        var p = new URLSearchParams(location.search);
+        ['lang', 'r'].forEach(function (k) { p.delete(k); });
+        return p.toString() ? '?' + p.toString() : '';
+      })();
+      var lastPage = null;
+      function trackPage(hash, title, lang) {
+        if (typeof gtag !== 'function') return;
+        var path = '/' + String(hash || '#/').replace(/^#\/?/, '').split('?')[0];
+        if (path === lastPage) return;
+        if (/^\/(member|admin-)/.test(path)) { lastPage = path; return; }  // 회원·관리 화면은 운영진용이라 세지 않는다
+        lastPage = path;
+        gtag('event', 'page_view', { page_location: location.origin + path + firstSearch, page_title: title, language: lang });
+      }
+      // 앱이 보낼 수 있는 행동 이벤트와 값(개인 정보가 들어갈 수 없는 이름만 허용)
+      var EVENTS = {
+        project_view: ['project_id'], team_view: [], why_view: [], contact_click: ['link_location'],
+        email_click: ['link_location'], phone_click: ['link_location'], outbound_click: ['link_domain', 'link_location'],
+        guide_open: [], language_switch: ['language'], generate_lead: ['inquiry_type'], login: ['method'], sign_up: ['method']
+      };
+      function trackEvent(name, params) {
+        if (typeof gtag !== 'function' || !EVENTS.hasOwnProperty(name)) return;
+        var out = {};
+        EVENTS[name].forEach(function (k) {
+          var v = params && params[k];
+          if (typeof v === 'string' && v && !/@|\d{3,}[-\s]?\d{3,}/.test(v)) out[k] = v.slice(0, 60);
+        });
+        gtag('event', name, out);
+      }
+
       // 앱이 현재 화면 주소를 알려 주면 주소창과 탭 제목을 맞춘다 (예: hemprnd.org/#/projects)
       window.addEventListener('message', function (event) {
         if (!ALLOWED_ORIGIN.test(event.origin)) return;
         var data = event.data;
+        if (data && data.type === 'ihra:event' && typeof data.name === 'string') { trackEvent(data.name, data.params); return; }
         if (!data || data.type !== 'ihra:route') return;
+        if (typeof data.hash === 'string' && /^#\/[^\s<>"']*$/.test(data.hash)) trackPage(data.hash, String(data.title || '').slice(0, 120), data.lang === 'en' ? 'en' : 'ko');
 
         var search = location.search;
         if (data.lang === 'en' || data.lang === 'ko') {
