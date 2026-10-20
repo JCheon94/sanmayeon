@@ -181,7 +181,7 @@
         var data = event.data;
         if (data && data.type === 'ihra:event' && typeof data.name === 'string') { trackEvent(data.name, data.params); return; }
         if (!data || data.type !== 'ihra:route') return;
-        if (typeof data.hash === 'string' && /^#\/[^\s<>"']*$/.test(data.hash)) trackPage(data.hash, String(data.title || '').slice(0, 120), data.lang === 'en' ? 'en' : 'ko');
+        if (typeof data.hash === 'string' && /^#\/[^\s<>"']*$/.test(data.hash)) trackPage(data.hash, String(data.titleKo || data.title || '').slice(0, 120), data.lang === 'en' ? 'en' : 'ko');
 
         var search = location.search;
         if (data.lang === 'en' || data.lang === 'ko') {
