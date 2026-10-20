@@ -31,6 +31,7 @@
     "logo": "https://hemprnd.org/assets/logo.png",
     "slogan": "FROM FIELD TO INDUSTRY — 지역의 자원에서, 산업의 가능성으로",
     "description": "산업용대마연구회(산마연)는 산업용 헴프를 농업에서 소재·산업으로 연결하기 위해 재배, 소재, 지역, 환경 분야를 연구하는 연구회입니다.",
+    "email": "admin.hemprnd@gmail.com",
     "areaServed": "전북특별자치도",
     "knowsAbout": ["산업용 헴프", "산업용 대마", "헴프 소재", "새만금 실증", "지역순환경제"]
   }
@@ -60,6 +61,7 @@
     <p>산업용대마연구회(산마연)는 산업용 헴프를 농업에서 산업으로 연결하기 위해 재배, 소재, 지역, 환경 네 분야를 연구하는 전북 지역 연구회입니다.</p>
     <p>새만금 염류 토양 실증조사, 「쨈매로 다다잇선 혁신 프로젝트」 참여, 전북특별자치도의회 산업용 헴프 정책 간담회 참여 등 현장과 정책을 잇는 활동을 하고 있습니다.</p>
     <p>연구회 소개, 연구·프로젝트, 활동, 연구성과, 아카이브, 협력 문의를 hemprnd.org에서 확인할 수 있습니다.</p>
+    <p>연락처: <a href="mailto:admin.hemprnd@gmail.com">admin.hemprnd@gmail.com</a></p>
   </header>
 
   <div class="loading" id="loading" role="status">
@@ -94,10 +96,18 @@
         return location.hash && location.hash.length > 1 ? location.hash : '';
       }
 
+      function currentLang() {
+        var l = new URLSearchParams(location.search).get('lang');
+        return l === 'en' || l === 'ko' ? l : '';
+      }
+
       function load(hash, fresh) {
-        var url = APP_URL + (fresh ? '?r=' + Date.now() : '') + (hash ? '#' + hash.replace(/^#/, '') : '');
+        var q = [];
+        if (currentLang()) q.push('lang=' + currentLang());
+        var base = APP_URL + (q.length ? '?' + q.join('&') : '');
+        var url = APP_URL + (q.length || fresh ? '?' + q.concat(fresh ? ['r=' + Date.now()] : []).join('&') : '') + (hash ? '#' + hash.replace(/^#/, '') : '');
         frame.src = url;
-        fallback.href = APP_URL + (hash ? '#' + hash.replace(/^#/, '') : '');
+        fallback.href = base + (hash ? '#' + hash.replace(/^#/, '') : '');
       }
 
       function markReady() {
@@ -113,9 +123,16 @@
         var data = event.data;
         if (!data || data.type !== 'ihra:route') return;
 
+        var search = location.search;
+        if (data.lang === 'en' || data.lang === 'ko') {
+          var params = new URLSearchParams(location.search);
+          if (data.lang === 'en') params.set('lang', 'en'); else params.delete('lang');
+          search = params.toString() ? '?' + params.toString() : '';
+          document.documentElement.lang = data.lang;
+        }
         if (typeof data.hash === 'string' && data.hash.length < 300 && /^#\/[^\s<>"']*$/.test(data.hash)) {
           var next = data.hash === '#/' ? '' : data.hash;
-          if (next !== currentHash()) history.replaceState(null, '', location.pathname + location.search + next);
+          if (next !== currentHash() || search !== location.search) history.replaceState(null, '', location.pathname + search + next);
         }
         if (typeof data.title === 'string' && data.title) document.title = data.title.slice(0, 120);
         if (data.ready) markReady();
