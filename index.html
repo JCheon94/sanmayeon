@@ -102,6 +102,7 @@
       // 앱이 보내는 주소 알림을 받아도 되는 출처(구글 서버)
       var ALLOWED_ORIGIN = /^https:\/\/([a-z0-9-]+\.)*(googleusercontent\.com|google\.com)$/;
 
+      var HOME_TITLE = document.title;
       var frame = document.getElementById('app');
       var loading = document.getElementById('loading');
       var fallback = document.getElementById('fallback');
@@ -198,7 +199,10 @@
           var next = data.hash === '#/' ? '' : data.hash;
           if (next !== currentHash() || search !== location.search) history.replaceState(null, '', location.pathname + search + next);
         }
-        if (typeof data.title === 'string' && data.title) document.title = data.title.slice(0, 120);
+        // 홈(한국어)에서는 검색용으로 정해 둔 원래 제목(산업용대마연구회(산마연) · …)을 유지한다
+        if (typeof data.title === 'string' && data.title) {
+          document.title = (data.hash === '#/' && data.lang !== 'en') ? HOME_TITLE : data.title.slice(0, 120);
+        }
         if (data.ready) markReady();
       });
 
